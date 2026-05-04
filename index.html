@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22%D0%9F%D1%80%D0%B0%D0%B2%D0%B8%D1%82%D0%B5%D0%BB%D1%8C%D1%81%D1%82%D0%B2%D0%BE%20%D0%A0%D0%9F%22%2C%22short_name%22%3A%22%D0%9F%D1%80%D0%B0%D0%B2-%D0%B2%D0%BE%22%2C%22start_url%22%3A%22.%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%231a1a2e%22%2C%22theme_color%22%3A%22%231a1a2e%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22data%3Aimage%2Fsvg%2Bxml%2C%253Csvg%2520xmlns%253D'http%253A%2F%2Fwww.w3.org%2F2000%2Fsvg'%2520viewBox%253D'0%25200%2520100%2520100'%253E%253Ctext%2520y%253D'80'%2520font-size%253D'80'%253E%25F0%259F%258F%259B%25EF%25B8%258F%253C%2Ftext%253E%253C%2Fsvg%253E%22%2C%22type%22%3A%22image%2Fsvg%2Bxml%22%2C%22sizes%22%3A%22100x100%22%7D%5D%7D">
+    <title>Правительство Родины RP v7.0</title>
+    <style>
+        :root {
+            --bg: #1a1a2e; --bg2: #16213e; --red: #e94560; --gold: #FFD700;
+            --text: #fff; --text2: #b0b0b0; --green: #00c853; --blue: #4facfe;
+            --silver: #C0C0C0; --bronze: #CD7F32; --orange: #ff9100; --purple: #7c4dff;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; overflow-x:hidden; }
+        .splash { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#1a1a2e,#16213e); z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; transition:opacity 0.5s; }
+        .splash-icon { font-size:4em; animation:pulse 2s infinite; }
+        @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+        .auth-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg,#1a1a2e,#0f3460); z-index:1000; display:flex; justify-content:center; align-items:center; padding:20px; }
+        .auth-overlay.hidden { display:none; }
+        .auth-card { background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border-radius:24px; padding:30px 20px; width:100%; max-width:400px; border:1px solid rgba(255,255,255,0.1); }
+        .auth-tabs { display:flex; background:rgba(255,255,255,0.05); border-radius:12px; padding:4px; margin-bottom:25px; }
+        .auth-tab { flex:1; padding:12px; text-align:center; border-radius:10px; cursor:pointer; border:none; background:none; color:var(--text2); }
+        .auth-tab.active { background:var(--red); color:white; }
+        .inp-group { margin-bottom:15px; }
+        .inp-label { display:block; margin-bottom:5px; font-size:0.85em; color:var(--text2); }
+        .inp-field { width:100%; padding:14px; background:rgba(255,255,255,0.08); border:2px solid rgba(255,255,255,0.1); border-radius:14px; color:white; font-size:1em; outline:none; }
+        .inp-field:focus { border-color:var(--red); }
+        select.inp-field { appearance:none; }
+        .btn { width:100%; padding:15px; border:none; border-radius:14px; font-size:1em; font-weight:bold; cursor:pointer; color:white; }
+        .btn:active { transform:scale(0.98); }
+        .btn-red { background:linear-gradient(135deg,#e94560,#c23152); }
+        .btn-green { background:linear-gradient(135deg,#00c853,#00a844); }
+        .btn-blue { background:linear-gradient(135deg,#4facfe,#00f2fe); }
+        .btn-gold { background:linear-gradient(135deg,#FFD700,#FFA500); color:#1a1a2e; }
+        .btn-purple { background:linear-gradient(135deg,#7c4dff,#651fff); }
+        .btn-sm { width:auto; padding:8px 16px; font-size:0.85em; border-radius:10px; display:inline-block; }
+        .err-msg { color:#ff1744; font-size:0.85em; display:none; padding:10px; background:rgba(255,23,68,0.1); border-radius:10px; margin-bottom:10px; }
+        .app { display:none; }
+        .app.active { display:block; }
+        .topbar { position:sticky; top:0; z-index:100; background:rgba(26,26,46,0.95); backdrop-filter:blur(20px); padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:12px; }
+        .top-avatar { width:40px; height:40px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; cursor:pointer; font-size:1.3em; }
+        .top-info { flex:1; min-width:0; }
+        .top-name { font-weight:bold; font-size:0.9em; }
+        .badge-owner { background:rgba(255,215,0,0.3); color:#FFD700; border:2px solid #FFD700; padding:3px 10px; border-radius:10px; font-size:0.7em; animation:glow 1.5s infinite; }
+        @keyframes glow { 0%,100%{box-shadow:0 0 5px rgba(255,215,0,0.5)} 50%{box-shadow:0 0 20px rgba(255,215,0,1)} }
+        .badge-adm { background:rgba(233,69,96,0.2); color:#e94560; border:1px solid #e94560; padding:2px 8px; border-radius:10px; font-size:0.7em; }
+        .badge-usr { background:rgba(0,200,131,0.2); color:#00c853; border:1px solid #00c853; padding:2px 8px; border-radius:10px; font-size:0.7em; }
+        .btn-out { background:rgba(255,23,68,0.1); border:1px solid rgba(255,23,68,0.3); color:#ff1744; padding:8px 14px; border-radius:10px; font-size:0.8em; cursor:pointer; white-space:nowrap; }
+        .view-btn { position:fixed; bottom:100px; right:20px; z-index:99; width:50px; height:50px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1.5em; border:none; color:white; }
+        .content { padding:15px; padding-bottom:80px; }
+        .page { display:none; animation:fadeIn 0.3s; }
+        .page.active { display:block; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .sec-title { font-size:1.3em; font-weight:bold; margin-bottom:15px; padding-left:10px; border-left:4px solid var(--red); }
+        .card { background:rgba(255,255,255,0.05); border-radius:16px; padding:15px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.08); cursor:pointer; position:relative; overflow:hidden; }
+        .card:active { transform:scale(0.98); }
+        .card-line { position:absolute; left:0; top:0; width:4px; height:100%; }
+        .line-pres { background:var(--gold); } .line-vice { background:var(--silver); } .line-prem { background:var(--bronze); }
+        .card-head { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+        .card-ava { width:45px; height:45px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; color:white; background:linear-gradient(135deg,#667eea,#764ba2); font-size:1.2em; overflow:hidden; }
+        .card-ava img { width:100%; height:100%; object-fit:cover; }
+        .card-body { flex:1; } .card-name { font-weight:bold; } .card-pos { font-size:0.8em; color:var(--text2); }
+        .stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+        .stat { background:rgba(255,255,255,0.05); border-radius:14px; padding:15px; text-align:center; }
+        .stat-val { font-size:1.8em; font-weight:bold; background:linear-gradient(135deg,#e94560,#FFD700); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .stat-lab { font-size:0.75em; color:var(--text2); margin-top:5px; }
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:rgba(26,26,46,0.98); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.1); display:flex; z-index:100; padding:5px 0 15px; }
+        .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px; cursor:pointer; border:none; background:none; color:var(--text2); font-size:0.6em; }
+        .nav-btn.active { color:var(--red); } .nav-icon { font-size:1.3em; }
+        .more-btn { flex:0.8; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 4px; cursor:pointer; border:none; background:none; color:var(--text2); font-size:0.6em; }
+        .more-btn.active { color:var(--red); } .more-icon { font-size:1.5em; font-weight:bold; }
+        .dropdown-menu { position:fixed; bottom:75px; right:10px; z-index:150; background:rgba(26,26,46,0.98); backdrop-filter:blur(20px); border-radius:16px; border:1px solid rgba(255,255,255,0.2); padding:8px; min-width:200px; max-height:60vh; overflow-y:auto; display:none; animation:slideUpMenu 0.3s; box-shadow:0 -5px 30px rgba(0,0,0,0.5); }
+        .dropdown-menu.active { display:block; }
+        @keyframes slideUpMenu { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .dropdown-item { display:flex; align-items:center; gap:12px; padding:12px 16px; border-radius:12px; cursor:pointer; color:var(--text2); font-size:0.9em; border:none; background:none; width:100%; }
+        .dropdown-item:active { background:rgba(255,255,255,0.1); color:white; }
+        .dropdown-divider { height:1px; background:rgba(255,255,255,0.1); margin:5px 0; }
+        .dropdown-overlay { position:fixed; top:0; left:0; width:100%; height:100%; z-index:140; display:none; }
+        .dropdown-overlay.active { display:block; }
+        .detail-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px; }
+        .detail-overlay.active { display:flex; }
+        .detail-card { background:linear-gradient(135deg,#1a1a2e,#16213e); border-radius:20px; padding:25px; width:100%; max-width:500px; max-height:85vh; overflow-y:auto; border:1px solid rgba(255,255,255,0.2); animation:slideUp 0.3s; }
+        @keyframes slideUp { from{transform:translateY(50px);opacity:0} to{transform:translateY(0);opacity:1} }
+        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:none; justify-content:center; align-items:center; padding:20px; }
+        .modal-overlay.active { display:flex; }
+        .modal-card { background:linear-gradient(135deg,#1a1a2e,#16213e); border-radius:20px; padding:25px; width:100%; max-width:450px; border:1px solid rgba(255,255,255,0.1); max-height:80vh; overflow-y:auto; }
+        .chat-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:none; justify-content:center; align-items:flex-end; }
+        .chat-overlay.active { display:flex; }
+        .chat-win { background:linear-gradient(180deg,#1a1a2e,#0f3460); border-radius:24px 24px 0 0; width:100%; max-width:500px; height:80vh; display:flex; flex-direction:column; animation:slideUp 0.4s; }
+        .chat-head { display:flex; justify-content:space-between; padding:15px 20px; border-bottom:1px solid rgba(255,255,255,0.1); }
+        .chat-msgs { flex:1; overflow-y:auto; padding:15px; }
+        .chat-msg { max-width:80%; padding:12px; border-radius:16px; font-size:0.9em; margin-bottom:10px; }
+        .chat-msg.me { margin-left:auto; background:var(--red); }
+        .chat-msg.other { background:rgba(255,255,255,0.1); }
+        .chat-inp-area { display:flex; padding:15px; gap:10px; border-top:1px solid rgba(255,255,255,0.1); }
+        .chat-inp { flex:1; padding:12px; background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.1); border-radius:12px; color:white; outline:none; }
+        .chat-send { padding:12px 20px; background:var(--red); border:none; border-radius:12px; color:white; cursor:pointer; }
+        .toast { position:fixed; top:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); color:white; padding:12px 24px; border-radius:12px; font-size:0.9em; z-index:3000; animation:toastIn 0.3s; }
+        @keyframes toastIn { from{transform:translateX(-50%) translateY(-100%);opacity:0} to{transform:translateX(-50%) translateY(0);opacity:1} }
+        .desktop-header { background:rgba(255,255,255,0.05); backdrop-filter:blur(20px); border-radius:20px; padding:20px 30px; margin:20px; display:flex; justify-content:space-between; align-items:center; }
+        .desktop-sidebar { position:fixed; left:20px; top:120px; width:230px; background:rgba(255,255,255,0.05); border-radius:16px; padding:15px; max-height:70vh; overflow-y:auto; }
+        .sidebar-btn { display:flex; align-items:center; gap:10px; padding:12px 15px; border-radius:12px; cursor:pointer; margin-bottom:5px; color:var(--text2); border:none; background:none; width:100%; font-size:0.9em; }
+        .sidebar-btn.active { background:var(--red); color:white; }
+        .desktop-main { margin-left:270px; padding:20px; }
+        .desktop-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .desktop-panel { background:rgba(255,255,255,0.05); border-radius:16px; padding:20px; }
+        .desktop-full { grid-column:1 / -1; }
+        .hidden { display:none !important; }
+        .map-building { text-align:center; padding:15px 10px; background:rgba(255,255,255,0.05); border-radius:14px; cursor:pointer; transition:all 0.3s; font-size:0.75em; }
+        .map-building:active { transform:scale(0.95); }
+        .map-icon { font-size:2em; display:block; margin-bottom:5px; }
+        .wanted-badge { background:rgba(255,23,68,0.3); color:#ff1744; padding:2px 8px; border-radius:8px; font-size:0.7em; }
+        .construction-status { display:inline-block; padding:3px 10px; border-radius:10px; font-size:0.7em; }
+        .status-construction { background:rgba(255,145,0,0.2); color:#ff9100; }
+        .status-completed { background:rgba(0,200,131,0.2); color:#00c853; }
+        @media (min-width:768px) { .detail-card { max-width:600px; } }
+    </style>
+</head>
+<body>
+
+<div class="splash" id="splash"><div class="splash-icon">🏛️</div><div style="font-size:1.5em;font-weight:bold;margin-top:20px;background:linear-gradient(135deg,#FFD700,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Правительство Родины v7.0</div></div>
+
+<div class="auth-overlay" id="authScreen">
+    <div class="auth-card">
+        <div style="text-align:center;font-size:3em;">🏛️</div>
+        <div style="text-align:center;font-size:1.8em;font-weight:bold;background:linear-gradient(135deg,#FFD700,#e94560);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Правительство</div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="authTab('login')">Вход</button>
+            <button class="auth-tab" onclick="authTab('register')">Регистрация</button>
+        </div>
+        <form id="loginForm" onsubmit="login(event)">
+            <div class="inp-group"><label class="inp-label">👤 Логин</label><input type="text" class="inp-field" id="loginUser" required></div>
+            <div class="inp-group"><label class="inp-label">🔒 Пароль</label><input type="password" class="inp-field" id="loginPass" required></div>
+            <div class="err-msg" id="loginErr"></div>
+            <button type="submit" class="btn btn-red">Войти</button>
+        </form>
+        <form id="registerForm" style="display:none;" onsubmit="register(event)">
+            <div class="inp-group"><label class="inp-label">👤 Логин</label><input type="text" class="inp-field" id="regUser" required minlength="3"></div>
+            <div class="inp-group"><label class="inp-label">🔒 Пароль</label><input type="password" class="inp-field" id="regPass" required minlength="6"></div>
+            <div class="inp-group"><label class="inp-label">🎭 Имя персонажа</label><input type="text" class="inp-field" id="regName" required></div>
+            <div class="inp-group"><label class="inp-label">🔑 Код (OWNER2024 / gov2024admin)</label><input type="text" class="inp-field" id="regCode"></div>
+            <div class="err-msg" id="regErr"></div>
+            <button type="submit" class="btn btn-green">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+
+<div class="app" id="appMobile">
+    <div class="topbar">
+        <div class="top-avatar" id="mAv" onclick="changeAvatar()">👤</div>
+        <div class="top-info"><div class="top-name" id="mNm"></div><span id="mBadge"></span></div>
+        <button class="btn-out" onclick="logout()">Выйти</button>
+    </div>
+    <div class="content">
+        <div class="page active" id="mhome"></div>
+        <div class="page" id="mmap"></div>
+        <div class="page" id="mmembers"></div>
+        <div class="page" id="mbusiness"></div>
+        <div class="page" id="mmvd"></div>
+        <div class="page" id="mcourt"></div>
+        <div class="page" id="mtaxes"></div>
+        <div class="page" id="mconstruction"></div>
+        <div class="page" id="mnews"></div>
+        <div class="page" id="melections"></div>
+        <div class="page" id="mdecrees"></div>
+        <div class="page" id="msalaries"></div>
+        <div class="page" id="mmortgage"></div>
+        <div class="page" id="mlawyers"></div>
+        <div class="page" id="mphotos"></div>
+        <div class="page" id="madmin"></div>
+    </div>
+    <div class="bottom-nav" id="mobileNav">
+        <button class="nav-btn active" data-page="home"><span class="nav-icon">🏠</span>Главная</button>
+        <button class="nav-btn" data-page="map"><span class="nav-icon">🗺️</span>Карта</button>
+        <button class="nav-btn" data-page="members"><span class="nav-icon">👥</span>Состав</button>
+        <button class="nav-btn" data-page="business"><span class="nav-icon">💼</span>Бизнес</button>
+        <button class="more-btn" id="moreBtn" onclick="toggleDropdown()"><span class="more-icon">⋮</span>Ещё</button>
+    </div>
+    <div class="dropdown-overlay" id="dropdownOverlay" onclick="closeDropdown()"></div>
+    <div class="dropdown-menu" id="dropdownMenu">
+        <button class="dropdown-item" onclick="switchPage('mvd');closeDropdown();"><span>🚔</span> МВД и Розыск</button>
+        <button class="dropdown-item" onclick="switchPage('court');closeDropdown();"><span>⚖️</span> Суд</button>
+        <button class="dropdown-item" onclick="switchPage('taxes');closeDropdown();"><span>📊</span> Налоговая</button>
+        <button class="dropdown-item" onclick="switchPage('construction');closeDropdown();"><span>🏗️</span> Стройка</button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" onclick="switchPage('news');closeDropdown();"><span>📰</span> Новости</button>
+        <button class="dropdown-item" onclick="switchPage('elections');closeDropdown();"><span>🗳️</span> Выборы</button>
+        <button class="dropdown-item" onclick="switchPage('decrees');closeDropdown();"><span>📜</span> Указы</button>
+        <button class="dropdown-item" onclick="switchPage('salaries');closeDropdown();"><span>💰</span> Зарплаты</button>
+        <button class="dropdown-item" onclick="switchPage('mortgage');closeDropdown();"><span>🏠</span> Ипотека</button>
+        <button class="dropdown-item" onclick="switchPage('lawyers');closeDropdown();"><span>⚖️</span> Адвокаты</button>
+        <button class="dropdown-item" onclick="switchPage('photos');closeDropdown();"><span>📸</span> Фото</button>
+        <div class="dropdown-divider"></div>
+        <button class="dropdown-item" id="mAdmDropdown" style="display:none;" onclick="switchPage('admin');closeDropdown();"><span>⚙️</span> Админ</button>
+        <button class="dropdown-item" onclick="openChat();closeDropdown();"><span>💬</span> Чат</button>
+    </div>
+</div>
+
+<div class="app hidden" id="appDesktop">
+    <div class="desktop-header">
+        <div style="font-size:1.5em;font-weight:bold;">🏛️ Правительство Родины RP</div>
+        <div style="display:flex;align-items:center;gap:15px;">
+            <div style="width:45px;height:45px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5em;font-weight:bold;color:white;background:linear-gradient(135deg,#e94560,#FFD700);cursor:pointer;" id="dAv" onclick="changeAvatar()">👤</div>
+            <div><strong id="dNm"></strong><br><span id="dBadge"></span></div>
+            <button class="btn-out" onclick="logout()">Выйти</button>
+        </div>
+    </div>
+    <div class="desktop-sidebar">
+        <button class="sidebar-btn active" data-dpage="home"><span>🏠</span> Главная</button>
+        <button class="sidebar-btn" data-dpage="map"><span>🗺️</span> Карта</button>
+        <button class="sidebar-btn" data-dpage="members"><span>👥</span> Состав</button>
+        <button class="sidebar-btn" data-dpage="business"><span>💼</span> Бизнес</button>
+        <button class="sidebar-btn" data-dpage="mvd"><span>🚔</span> МВД и Розыск</button>
+        <button class="sidebar-btn" data-dpage="court"><span>⚖️</span> Суд</button>
+        <button class="sidebar-btn" data-dpage="taxes"><span>📊</span> Налоги</button>
+        <button class="sidebar-btn" data-dpage="construction"><span>🏗️</span> Стройка</button>
+        <button class="sidebar-btn" data-dpage="news"><span>📰</span> Новости</button>
+        <button class="sidebar-btn" data-dpage="elections"><span>🗳️</span> Выборы</button>
+        <button class="sidebar-btn" data-dpage="decrees"><span>📜</span> Указы</button>
+        <button class="sidebar-btn" data-dpage="salaries"><span>💰</span> Зарплаты</button>
+        <button class="sidebar-btn" data-dpage="mortgage"><span>🏠</span> Ипотека</button>
+        <button class="sidebar-btn" data-dpage="lawyers"><span>⚖️</span> Адвокаты</button>
+        <button class="sidebar-btn" data-dpage="photos"><span>📸</span> Фото</button>
+        <button class="sidebar-btn" id="dAdmBtn" style="display:none;" data-dpage="admin"><span>⚙️</span> Админ</button>
+    </div>
+    <div class="desktop-main"><div class="desktop-grid" id="desktopGrid"></div></div>
+</div>
+
+<button class="view-btn hidden" id="viewBtn" onclick="toggleView()">🖥️</button>
+<div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()"><div class="detail-card" id="detailCard"></div></div>
+<div class="chat-overlay" id="chatOverlay" onclick="if(event.target===this)closeChat()"><div class="chat-win"><div class="chat-head"><span>💬 Чат</span><button style="background:none;border:none;color:white;font-size:1.5em;cursor:pointer;" onclick="closeChat()">✕</button></div><div class="chat-msgs" id="chatMsgs"></div><div class="chat-inp-area"><input type="text" class="chat-inp" id="chatInp" placeholder="Сообщение..." onkeypress="if(event.key==='Enter')sendChat()"><button class="chat-send" onclick="sendChat()">📤</button></div></div></div>
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()"><div class="modal-card" id="modalCard"></div></div>
+<script>
+// ==================== ДАННЫЕ ====================
+let currentUser=null,usersDB=[],gov={members:[],transitions:[],elections:null,news:[],salaries:[],mortgages:[],lawyers:[],decrees:[],businesses:[],courtCases:[],taxes:[],wanted:[],constructions:[],photos:{}},chatMessages=[],currentView='mobile',currentPage='home',syncInterval=null;
+const OWNER='OWNER2024',ADMIN='gov2024admin',SYNC_KEY='gov70_sync',SYNC_URL=localStorage.getItem('gov70_sync_url')||'';
+const posInfo={president:{title:'Президент',icon:'👑',line:'line-pres',salary:50000},vicePresident:{title:'Вице-президент',icon:'⭐',line:'line-vice',salary:40000},primeMinister:{title:'Премьер-министр',icon:'🎖️',line:'line-prem',salary:45000},minister:{title:'Министр',icon:'📋',salary:35000},deputyMinister:{title:'Зам. министра',icon:'📎',salary:28000},director:{title:'Директор',icon:'📊',salary:22000},chief:{title:'Начальник',icon:'👔',salary:18000},specialist:{title:'Специалист',icon:'💼',salary:15000},assistant:{title:'Помощник',icon:'📝',salary:12000},intern:{title:'Стажёр',icon:'🎓',salary:8000}};
+const avatarEmojis=['👤','👨‍💼','👩‍💼','👑','🎖️','⭐','🦸','🤴','👸','🧑‍⚖️','👨‍✈️','👩‍🚀','👮','👷','🕵️','💂','🤵','👲','🧙','🧑‍💻'];
+const mapBuildings=[{id:'gov',name:'Правительство',icon:'🏛️',desc:'Центральное здание'},{id:'mvd',name:'МВД',icon:'🚔',desc:'Полицейский участок'},{id:'court',name:'Суд',icon:'⚖️',desc:'Верховный суд'},{id:'tax',name:'Налоговая',icon:'📊',desc:'ФНС'},{id:'bank',name:'Банк',icon:'🏦',desc:'Центробанк'},{id:'hospital',name:'Больница',icon:'🏥',desc:'Горбольница'},{id:'biz',name:'Бизнес-центр',icon:'🏢',desc:'Центр бизнеса'},{id:'construction',name:'Стройка',icon:'🏗️',desc:'Департамент строительства'}];
+
+function loadData(){
+    try{
+        const u=localStorage.getItem('gov70_users');usersDB=u?JSON.parse(u):[{id:1,username:'admin',password:'admin123',characterName:'Владелец',role:'owner',avatar:'👑',createdAt:new Date().toISOString()}];
+        if(!u)saveUsers();
+        const g=localStorage.getItem('gov70_gov');
+        if(g){gov=JSON.parse(g);['salaries','mortgages','lawyers','decrees','businesses','courtCases','taxes','wanted','constructions'].forEach(k=>{if(!gov[k])gov[k]=[];});}
+        else{initAllData();saveGov();}
+        const c=localStorage.getItem('gov70_chat');chatMessages=c?JSON.parse(c):[];
+        loadSyncSettings();
+    }catch(e){console.error(e);initAllData();saveGov();}
+}
+function saveUsers(){localStorage.setItem('gov70_users',JSON.stringify(usersDB));}
+function saveGov(){localStorage.setItem('gov70_gov',JSON.stringify(gov));syncBroadcast();}
+function saveChat(){localStorage.setItem('gov70_chat',JSON.stringify(chatMessages));}
+function initAllData(){
+    gov={members:[],transitions:[],elections:null,news:[],salaries:[],mortgages:[],lawyers:[],decrees:[],businesses:[],courtCases:[],taxes:[],wanted:[],constructions:[],photos:{}};
+    [{n:"Александр Смирнов",p:"president"},{n:"Екатерина Волкова",p:"vicePresident"},{n:"Дмитрий Морозов",p:"primeMinister"},{n:"Анна Козлова",p:"minister",d:"Минфин"},{n:"Сергей Иванов",p:"minister",d:"МВД"}].forEach(x=>{gov.members.push({id:Date.now()+Math.random(),name:x.n,position:x.p,department:x.d||null,salary:posInfo[x.p].salary,isActive:true,joinDate:new Date().toISOString(),addedBy:'system',photoUrl:'',history:[{action:"Назначение",date:new Date().toISOString()}]});});
+    gov.businesses=[{id:1,name:"Автосалон Премиум",owner:"Александр Смирнов",type:"Автосалон",license:"ЛЦ-001",status:"active",date:new Date().toISOString()},{id:2,name:"Ресторан Золотой",owner:"Екатерина Волкова",type:"Ресторан",license:"ЛЦ-002",status:"active",date:new Date().toISOString()}];
+    gov.courtCases=[{id:1,number:"СД-001",plaintiff:"Иванов",defendant:"Петров",type:"Гражданское",status:"open",description:"Спор о собственности",date:new Date().toISOString(),judge:"Фёдорова О.А.",hearings:[{date:new Date().toISOString(),text:"Предварительное слушание"}],evidence:["Договор купли-продажи","Показания свидетелей"]},{id:2,number:"СД-002",plaintiff:"Гос-во",defendant:"Сидоров",type:"Уголовное",status:"open",description:"Кража",date:new Date(Date.now()-86400000).toISOString(),judge:"Фёдорова О.А.",hearings:[],evidence:["Запись с камер"]}];
+    gov.taxes=[{id:1,payer:"Автосалон Премиум",amount:15000,type:"Налог на прибыль",status:"paid",date:new Date().toISOString()},{id:2,payer:"Ресторан Золотой",amount:8000,type:"НДС",status:"pending",date:new Date().toISOString(),deadline:new Date(Date.now()+86400000*7).toISOString()}];
+    gov.wanted=[{id:1,name:"Иванов И.И.",crime:"Кража",level:"Опасно",description:"Разыскивается за кражу в магазине",lastSeen:"Центральный район",date:new Date().toISOString()},{id:2,name:"Петров П.П.",crime:"Мошенничество",level:"Средне",description:"Финансовые махинации",lastSeen:"Северный район",date:new Date(Date.now()-86400000).toISOString()}];
+    gov.constructions=[{id:1,address:"ул. Центральная, 10",type:"Жилой дом",owner:"СтройКомпани",status:"construction",permit:"СТР-001",date:new Date().toISOString(),deadline:new Date(Date.now()+86400000*180).toISOString()},{id:2,address:"пр. Ленина, 25",type:"Торговый центр",owner:"МегаСтрой",status:"completed",permit:"СТР-002",date:new Date(Date.now()-86400000*365).toISOString(),deadline:new Date(Date.now()-86400000).toISOString()}];
+    gov.news=[{id:1,title:"🏛️ Система запущена",date:new Date().toISOString(),content:"Версия 7.0 с МВД, судом, стройкой и синхронизацией!",tag:"important",author:"admin"}];
+    gov.salaries=[{name:"Александр Смирнов",amount:50000,date:new Date().toISOString()}];
+    gov.decrees=[{id:1,number:"УП-001",text:"О создании системы",date:new Date().toISOString()}];
+}
+function isOwner(){return currentUser?.role==='owner';}
+function isAdmin(){return currentUser?.role==='admin'||isOwner();}
+
+// ==================== СИНХРОНИЗАЦИЯ ====================
+function loadSyncSettings(){
+    const url=localStorage.getItem('gov70_sync_url');
+    if(url) startSync(url);
+}
+function setupSync(url){
+    localStorage.setItem('gov70_sync_url',url);
+    startSync(url);
+    toast('🌐 Синхронизация настроена!');
+}
+function startSync(url){
+    if(syncInterval) clearInterval(syncInterval);
+    syncInterval=setInterval(()=>{
+        fetch(url+'/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({users:usersDB,gov,chat:chatMessages})}).then(r=>r.json()).then(data=>{
+            if(data.users) {usersDB=data.users;saveUsers();}
+            if(data.gov) {gov=data.gov;saveGov();refreshAll();}
+            if(data.chat) {chatMessages=data.chat;saveChat();}
+        }).catch(()=>{});
+    },5000);
+}
+function syncBroadcast(){
+    if(currentView==='mobile') renderMobilePage(currentPage);
+    else renderDesktopPage(currentPage);
+}
+
+function authTab(t){
+    document.querySelectorAll('.auth-tab').forEach(x=>x.classList.remove('active'));
+    document.getElementById('loginForm').style.display=t==='login'?'block':'none';
+    document.getElementById('registerForm').style.display=t==='register'?'block':'none';
+    document.querySelector(t==='login'?'.auth-tab:first-child':'.auth-tab:last-child').classList.add('active');
+    document.getElementById('loginErr').style.display='none';document.getElementById('regErr').style.display='none';
+}
+function login(e){e.preventDefault();const u=document.getElementById('loginUser').value.trim(),p=document.getElementById('loginPass').value,user=usersDB.find(x=>x.username===u&&x.password===p);if(user){currentUser={id:user.id,username:user.username,characterName:user.characterName,role:user.role,avatar:user.avatar||'👤'};localStorage.setItem('gov70_user',JSON.stringify(currentUser));showApp();}else{document.getElementById('loginErr').textContent='❌ Неверно';document.getElementById('loginErr').style.display='block';}}
+function register(e){e.preventDefault();const u=document.getElementById('regUser').value.trim(),p=document.getElementById('regPass').value,n=document.getElementById('regName').value.trim(),code=document.getElementById('regCode').value.trim(),err=document.getElementById('regErr');if(u.length<3){err.textContent='❌ Логин min 3';err.style.display='block';return;}if(p.length<6){err.textContent='❌ Пароль min 6';err.style.display='block';return;}if(usersDB.find(x=>x.username===u)){err.textContent='❌ Занято';err.style.display='block';return;}let role='user';if(code===OWNER)role='owner';else if(code===ADMIN)role='admin';usersDB.push({id:Date.now(),username:u,password:p,characterName:n,role,avatar:'👤',createdAt:new Date().toISOString()});saveUsers();toast(`✅ ${role==='owner'?'Владелец':role==='admin'?'Админ':'Игрок'}!`);authTab('login');document.getElementById('registerForm').reset();}
+function logout(){currentUser=null;localStorage.removeItem('gov70_user');if(syncInterval)clearInterval(syncInterval);document.getElementById('appMobile').classList.remove('active');document.getElementById('appDesktop').classList.add('hidden');document.getElementById('authScreen').classList.remove('hidden');document.getElementById('viewBtn').classList.add('hidden');closeDropdown();}
+function showApp(){document.getElementById('authScreen').classList.add('hidden');document.getElementById('viewBtn').classList.remove('hidden');updateUI();if(currentView==='mobile'){document.getElementById('appMobile').classList.add('active');switchPage('home');}else{document.getElementById('appDesktop').classList.remove('hidden');switchDPage('home');}}
+function updateUI(){const av=currentUser.avatar||'👤',r=currentUser.role;document.getElementById('mAv').textContent=av;document.getElementById('mNm').textContent=currentUser.characterName;document.getElementById('mBadge').innerHTML=r==='owner'?'<span class="badge-owner">👑 Владелец</span>':r==='admin'?'<span class="badge-adm">Админ</span>':'<span class="badge-usr">Игрок</span>';document.getElementById('mAdmDropdown').style.display=(r==='admin'||r==='owner')?'flex':'none';document.getElementById('dAv').textContent=av;document.getElementById('dNm').textContent=currentUser.characterName;document.getElementById('dBadge').innerHTML=r==='owner'?'<span class="badge-owner">👑 Владелец</span>':r==='admin'?'<span class="badge-adm">Администратор</span>':'<span class="badge-usr">Игрок</span>';document.getElementById('dAdmBtn').style.display=(r==='admin'||r==='owner')?'block':'none';}
+function toggleView(){currentView=currentView==='mobile'?'desktop':'mobile';document.getElementById('appMobile').classList.remove('active');document.getElementById('appDesktop').classList.add('hidden');document.getElementById('viewBtn').innerHTML=currentView==='mobile'?'🖥️':'📱';if(currentView==='mobile'){document.getElementById('appMobile').classList.add('active');switchPage(currentPage);}else{document.getElementById('appDesktop').classList.remove('hidden');switchDPage(currentPage);}localStorage.setItem('gov70_view',currentView);}
+
+function toggleDropdown(){const m=document.getElementById('dropdownMenu'),o=document.getElementById('dropdownOverlay'),b=document.getElementById('moreBtn');if(m.classList.contains('active')){closeDropdown();}else{m.classList.add('active');o.classList.add('active');b.classList.add('active');}}
+function closeDropdown(){document.getElementById('dropdownMenu').classList.remove('active');document.getElementById('dropdownOverlay').classList.remove('active');document.getElementById('moreBtn').classList.remove('active');}
+
+function changeAvatar(){
+    document.getElementById('modalCard').innerHTML=`<h3 style="margin-bottom:15px;">🎨 Аватар</h3><div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">${avatarEmojis.map(e=>`<div style="font-size:2em;cursor:pointer;padding:10px;text-align:center;border-radius:12px;background:rgba(255,255,255,0.05);" onclick="setAvatar('${e}')">${e}</div>`).join('')}</div><button class="btn btn-red" style="margin-top:15px;" onclick="closeModal()">Закрыть</button>`;
+    document.getElementById('modalOverlay').classList.add('active');
+}
+function setAvatar(e){currentUser.avatar=e;const u=usersDB.find(x=>x.id===currentUser.id);if(u){u.avatar=e;saveUsers();}localStorage.setItem('gov70_user',JSON.stringify(currentUser));updateUI();closeModal();toast('✅ Аватар обновлён!');}
+
+function switchPage(page){if(page==='admin'&&!isAdmin()){toast('Только для админов');return;}currentPage=page;closeDropdown();document.querySelectorAll('#appMobile .page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('#appMobile .nav-btn').forEach(b=>b.classList.remove('active'));const pg=document.getElementById('m'+page);if(pg)pg.classList.add('active');const mainPages=['home','map','members','business'];if(mainPages.includes(page)){const btn=document.querySelector(`#appMobile .nav-btn[data-page="${page}"]`);if(btn)btn.classList.add('active');}renderMobilePage(page);}
+function switchDPage(page){if(page==='admin'&&!isAdmin()){toast('Только для админов');return;}currentPage=page;document.querySelectorAll('#appDesktop .sidebar-btn').forEach(b=>b.classList.remove('active'));const btn=document.querySelector(`#appDesktop .sidebar-btn[data-dpage="${page}"]`);if(btn)btn.classList.add('active');renderDesktopPage(page);}
+document.getElementById('mobileNav').addEventListener('click',function(e){const btn=e.target.closest('.nav-btn[data-page]');if(btn)switchPage(btn.getAttribute('data-page'));});
+document.querySelector('#appDesktop .desktop-sidebar').addEventListener('click',function(e){const btn=e.target.closest('.sidebar-btn[data-dpage]');if(btn)switchDPage(btn.getAttribute('data-dpage'));});
+
+function memberCard(m){const info=posInfo[m.position]||{title:m.position,icon:'👤'};return`<div class="card" onclick="openProfile(${m.id})" style="padding-left:20px;"><div class="card-line ${info.line||''}"></div><div class="card-head"><div class="card-ava">${m.photoUrl?`<img src="${m.photoUrl}">`:m.name[0]}</div><div class="card-body"><div class="card-name">${m.name}</div><div class="card-pos">${info.icon} ${info.title}</div></div></div>${m.department?`<div style="color:#b0b0b0;font-size:0.8em;">📁 ${m.department}</div>`:''}<div style="color:#00c853;">💰 ${(m.salary||0).toLocaleString()}₽</div></div>`;}
+
+function renderMobilePage(page){const el=document.getElementById('m'+page);if(!el)return;switch(page){case'home':renderHome(el);break;case'map':renderMap(el);break;case'members':renderMembers(el);break;case'business':renderBusiness(el);break;case'mvd':renderMVD(el);break;case'court':renderCourt(el);break;case'taxes':renderTaxes(el);break;case'construction':renderConstruction(el);break;case'news':renderNews(el);break;case'elections':renderElections(el);break;case'decrees':renderDecrees(el);break;case'salaries':renderSalaries(el);break;case'mortgage':renderMortgage(el);break;case'lawyers':renderLawyers(el);break;case'photos':renderPhotos(el);break;case'admin':renderAdmin(el);break;}}
+function renderDesktopPage(page){const grid=document.getElementById('desktopGrid');grid.innerHTML=`<div class="desktop-panel desktop-full" id="d${page}"></div>`;const el=document.getElementById('d'+page);switch(page){case'home':renderHome(el);break;case'map':renderMap(el);break;case'members':renderMembers(el);break;case'business':renderBusiness(el);break;case'mvd':renderMVD(el);break;case'court':renderCourt(el);break;case'taxes':renderTaxes(el);break;case'construction':renderConstruction(el);break;case'news':renderNews(el);break;case'elections':renderElections(el);break;case'decrees':renderDecrees(el);break;case'salaries':renderSalaries(el);break;case'mortgage':renderMortgage(el);break;case'lawyers':renderLawyers(el);break;case'photos':renderPhotos(el);break;case'admin':renderAdmin(el);break;}}
+
+function renderHome(el){const active=gov.members.filter(m=>m.isActive);el.innerHTML=`<div class="sec-title">📊 Статистика</div><div class="stats"><div class="stat"><div class="stat-val">${active.length}</div><div class="stat-lab">Чиновников</div></div><div class="stat"><div class="stat-val">${gov.businesses.length}</div><div class="stat-lab">Бизнесов</div></div><div class="stat"><div class="stat-val">${gov.wanted.length}</div><div class="stat-lab">В розыске</div></div><div class="stat"><div class="stat-val">${gov.constructions.length}</div><div class="stat-lab">Строек</div></div></div><div class="sec-title">👥 Руководство</div>${active.filter(m=>['president','vicePresident','primeMinister'].includes(m.position)).map(m=>memberCard(m)).join('')||'<p style="color:#b0b0b0;">Нет</p>'}`;}
+
+function renderMap(el){
+    el.innerHTML=`<div class="sec-title">🗺️ Карта</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;">${mapBuildings.map(b=>`<div class="map-building" onclick="showBuildingInfo('${b.id}')"><span class="map-icon">${b.icon}</span>${b.name}</div>`).join('')}</div><div id="buildingInfo" style="margin-top:15px;"></div>`;
+}
+function showBuildingInfo(id){const b=mapBuildings.find(x=>x.id===id);if(!b)return;let e='';if(id==='mvd')e=`<br>🚔 В розыске: ${gov.wanted.length}`;if(id==='court')e=`<br>⚖️ Дел: ${gov.courtCases.filter(x=>x.status==='open').length}`;if(id==='construction')e=`<br>🏗️ Строек: ${gov.constructions.length}`;document.getElementById('buildingInfo').innerHTML=`<div class="card"><strong>${b.icon} ${b.name}</strong><br>${b.desc}${e}</div>`;}
+
+function renderMembers(el){const active=gov.members.filter(m=>m.isActive);el.innerHTML=`<div class="sec-title">👥 Состав</div><input type="text" style="width:100%;padding:12px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:14px;color:white;margin-bottom:15px;" placeholder="🔍 Поиск..." oninput="refreshMembers()">${active.map(m=>memberCard(m)).join('')||'<p style="color:#b0b0b0;">Пусто</p>'}`;}
+function refreshMembers(){if(currentView==='mobile')renderMobilePage('members');else{const el=document.getElementById('dmembers');if(el)renderMembers(el);}}
+
+// ==================== МВД И РОЗЫСК ====================
+function renderMVD(el){
+    el.innerHTML=`<div class="sec-title">🚔 МВД и Розыск</div>
+        ${isAdmin()?`<div class="adm-sect"><form onsubmit="addWanted(event)"><div class="inp-group"><label class="inp-label">Имя</label><input type="text" class="inp-field" id="wName" required></div>
+        <div class="inp-group"><label class="inp-label">Преступление</label><input type="text" class="inp-field" id="wCrime" required></div>
+        <div class="inp-group"><label class="inp-label">Уровень</label><select class="inp-field" id="wLevel"><option>Низкий</option><option>Средне</option><option>Опасно</option><option>Особо опасен</option></select></div>
+        <div class="inp-group"><label class="inp-label">Описание</label><textarea class="inp-field" id="wDesc" rows="2" required style="resize:vertical;"></textarea></div>
+        <button type="submit" class="btn btn-red">🚔 В розыск</button></form></div>`:''}
+        <div class="stats"><div class="stat"><div class="stat-val">${gov.wanted.length}</div><div class="stat-lab">В розыске</div></div></div>
+        ${gov.wanted.map(w=>`<div class="card" onclick="showWantedDetail(${w.id})"><strong>🚨 ${w.name}</strong> <span class="wanted-badge">${w.level}</span><br>${w.crime}<br><span style="color:#b0b0b0;">${w.lastSeen}</span></div>`).join('')||'<p style="color:#b0b0b0;">Нет</p>'}`;
+}
+function showWantedDetail(id){const w=gov.wanted.find(x=>x.id===id);if(!w)return;document.getElementById('detailCard').innerHTML=`<h3 style="color:#ff1744;">🚨 Розыск</h3><div style="margin:15px 0;"><strong>${w.name}</strong></div><div class="detail-row"><span>Преступление:</span><span>${w.crime}</span></div><div class="detail-row"><span>Уровень:</span><span style="color:#ff1744;">${w.level}</span></div><div class="detail-row"><span>Описание:</span><span>${w.description}</span></div><div class="detail-row"><span>Последнее место:</span><span>${w.lastSeen}</span></div><div class="detail-row"><span>Дата:</span><span>${new Date(w.date).toLocaleDateString()}</span></div>${isAdmin()?`<button class="btn btn-green" style="margin-top:15px;" onclick="removeWanted(${w.id});closeDetail();">✅ Снять с розыска</button>`:''}<button class="btn btn-red" style="margin-top:10px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+function addWanted(e){e.preventDefault();if(!isAdmin())return;const n=document.getElementById('wName').value.trim(),c=document.getElementById('wCrime').value.trim(),l=document.getElementById('wLevel').value,d=document.getElementById('wDesc').value.trim();if(!n||!c)return;gov.wanted.push({id:Date.now(),name:n,crime:c,level:l,description:d,lastSeen:'Город',date:new Date().toISOString()});saveGov();toast('🚔 В розыск!');e.target.reset();refreshAll();}
+function removeWanted(id){gov.wanted=gov.wanted.filter(x=>x.id!==id);saveGov();toast('Снят с розыска');refreshAll();}
+
+// ==================== СУД ====================
+function renderCourt(el){
+    el.innerHTML=`<div class="sec-title">⚖️ Верховный суд</div>
+        ${isAdmin()?`<div class="adm-sect"><form onsubmit="addCourtCase(event)"><div class="inp-group"><label class="inp-label">Истец</label><input type="text" class="inp-field" id="cPlaintiff" required></div>
+        <div class="inp-group"><label class="inp-label">Ответчик</label><input type="text" class="inp-field" id="cDefendant" required></div>
+        <div class="inp-group"><label class="inp-label">Тип</label><select class="inp-field" id="cType"><option>Гражданское</option><option>Административное</option><option>Уголовное</option></select></div>
+        <div class="inp-group"><label class="inp-label">Описание</label><textarea class="inp-field" id="cDesc" rows="2" required style="resize:vertical;"></textarea></div>
+        <button type="submit" class="btn btn-purple">⚖️ Открыть дело</button></form></div>`:''}
+        ${gov.courtCases.map(c=>`<div class="card" onclick="showCourtDetail(${c.id})" style="border-left:4px solid ${c.status==='open'?'#ff9100':'#00c853'}"><strong>⚖️ Дело №${c.number}</strong><br>${c.plaintiff} vs ${c.defendant}<br><span style="color:#b0b0b0;">${c.type} | ${c.status==='open'?'🟡 Открыто':'🟢 Закрыто'}</span></div>`).join('')||'<p style="color:#b0b0b0;">Нет дел</p>'}`;
+}
+function showCourtDetail(id){const c=gov.courtCases.find(x=>x.id===id);if(!c)return;document.getElementById('detailCard').innerHTML=`<h3 style="color:#FFD700;">⚖️ Дело №${c.number}</h3><div class="detail-row"><span>Истец:</span><span><strong>${c.plaintiff}</strong></span></div><div class="detail-row"><span>Ответчик:</span><span><strong>${c.defendant}</strong></span></div><div class="detail-row"><span>Тип:</span><span>${c.type}</span></div><div class="detail-row"><span>Судья:</span><span>${c.judge}</span></div><div class="detail-row"><span>Статус:</span><span style="color:${c.status==='open'?'#ff9100':'#00c853'}">${c.status==='open'?'Открыто':'Закрыто'}</span></div><div class="detail-row"><span>Описание:</span><span>${c.description}</span></div><div style="margin-top:15px;"><strong>📋 Слушания:</strong>${(c.hearings||[]).map(h=>`<div class="card">${h.text}<br><span style="font-size:0.7em;">${new Date(h.date).toLocaleString()}</span></div>`).join('')||'<p style="color:#b0b0b0;">Нет слушаний</p>'}</div><div style="margin-top:15px;"><strong>🔍 Доказательства:</strong>${(c.evidence||[]).map(e=>`<div style="padding:5px;">• ${e}</div>`).join('')}</div>${c.decision?`<div style="margin-top:15px;padding:15px;background:rgba(0,200,131,0.1);border-radius:12px;"><strong>✅ Решение:</strong> ${c.decision}</div>`:''}${isAdmin()?`<button class="btn btn-green" style="margin-top:15px;" onclick="addHearing(${c.id})">📋 Слушание</button><button class="btn btn-blue" style="margin-top:10px;" onclick="addEvidence(${c.id})">🔍 Доказательство</button>${c.status==='open'?`<button class="btn btn-purple" style="margin-top:10px;" onclick="closeCourtCase(${c.id})">✅ Решение</button>`:''}`:''}<button class="btn btn-red" style="margin-top:10px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+function addCourtCase(e){e.preventDefault();if(!isAdmin())return;const pl=document.getElementById('cPlaintiff').value.trim(),df=document.getElementById('cDefendant').value.trim(),tp=document.getElementById('cType').value,ds=document.getElementById('cDesc').value.trim();if(!pl||!df)return;gov.courtCases.push({id:Date.now(),number:'СД-'+String(gov.courtCases.length+1).padStart(3,'0'),plaintiff:pl,defendant:df,type:tp,status:'open',description:ds,date:new Date().toISOString(),judge:'Фёдорова О.А.',hearings:[],evidence:[],decision:null});saveGov();toast('⚖️ Дело открыто!');e.target.reset();refreshAll();}
+function addHearing(id){const c=gov.courtCases.find(x=>x.id===id);if(!c)return;const t=prompt('Текст слушания:');if(!t)return;c.hearings.push({date:new Date().toISOString(),text:t});saveGov();closeDetail();toast('📋 Слушание добавлено!');refreshAll();}
+function addEvidence(id){const c=gov.courtCases.find(x=>x.id===id);if(!c)return;const t=prompt('Доказательство:');if(!t)return;c.evidence.push(t);saveGov();closeDetail();toast('🔍 Доказательство добавлено!');refreshAll();}
+function closeCourtCase(id){const c=gov.courtCases.find(x=>x.id===id);if(!c)return;const d=prompt('Решение суда:');if(!d)return;c.status='closed';c.decision=d;saveGov();closeDetail();toast('⚖️ Решение вынесено!');refreshAll();}
+
+// ==================== СТРОИТЕЛЬСТВО ====================
+function renderConstruction(el){
+    el.innerHTML=`<div class="sec-title">🏗️ Строительство</div>
+        ${isAdmin()?`<div class="adm-sect"><form onsubmit="addConstruction(event)"><div class="inp-group"><label class="inp-label">Адрес</label><input type="text" class="inp-field" id="conAddress" required></div>
+        <div class="inp-group"><label class="inp-label">Тип</label><input type="text" class="inp-field" id="conType" required></div>
+        <div class="inp-group"><label class="inp-label">Застройщик</label><input type="text" class="inp-field" id="conOwner" required></div>
+        <button type="submit" class="btn btn-gold">🏗️ Выдать разрешение</button></form></div>`:''}
+        ${gov.constructions.map(c=>`<div class="card" onclick="showConstructionDetail(${c.id})" style="border-left:4px solid ${c.status==='construction'?'#ff9100':'#00c853'}"><strong>🏗️ ${c.address}</strong><br>${c.type} | ${c.owner}<br><span class="construction-status ${c.status==='construction'?'status-construction':'status-completed'}">${c.status==='construction'?'🚧 Строится':'✅ Завершено'}</span></div>`).join('')||'<p style="color:#b0b0b0;">Нет строек</p>'}`;
+}
+function showConstructionDetail(id){const c=gov.constructions.find(x=>x.id===id);if(!c)return;document.getElementById('detailCard').innerHTML=`<h3>🏗️ Объект</h3><div class="detail-row"><span>Адрес:</span><span>${c.address}</span></div><div class="detail-row"><span>Тип:</span><span>${c.type}</span></div><div class="detail-row"><span>Застройщик:</span><span>${c.owner}</span></div><div class="detail-row"><span>Разрешение:</span><span>${c.permit}</span></div><div class="detail-row"><span>Статус:</span><span style="color:${c.status==='construction'?'#ff9100':'#00c853'}">${c.status==='construction'?'Строится':'Завершено'}</span></div><div class="detail-row"><span>Начало:</span><span>${new Date(c.date).toLocaleDateString()}</span></div><div class="detail-row"><span>Срок:</span><span>${new Date(c.deadline).toLocaleDateString()}</span></div>${isAdmin()&&c.status==='construction'?`<button class="btn btn-green" style="margin-top:15px;" onclick="completeConstruction(${c.id})">✅ Завершить</button>`:''}<button class="btn btn-red" style="margin-top:10px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+function addConstruction(e){e.preventDefault();if(!isAdmin())return;const a=document.getElementById('conAddress').value.trim(),t=document.getElementById('conType').value.trim(),o=document.getElementById('conOwner').value.trim();if(!a||!t)return;gov.constructions.push({id:Date.now(),address:a,type:t,owner:o,status:'construction',permit:'СТР-'+String(gov.constructions.length+1).padStart(3,'0'),date:new Date().toISOString(),deadline:new Date(Date.now()+86400000*180).toISOString()});saveGov();toast('🏗️ Разрешение выдано!');e.target.reset();refreshAll();}
+function completeConstruction(id){const c=gov.constructions.find(x=>x.id===id);if(!c)return;c.status='completed';saveGov();closeDetail();toast('✅ Стройка завершена!');refreshAll();}
+
+function closeDetail(){document.getElementById('detailOverlay').classList.remove('active');}
+
+function renderTaxes(el){const tp=gov.taxes.filter(t=>t.status==='paid').reduce((s,t)=>s+(t.amount||0),0),tpd=gov.taxes.filter(t=>t.status==='pending').reduce((s,t)=>s+(t.amount||0),0);el.innerHTML=`<div class="sec-title">📊 Налоги</div>${isAdmin()?`<div class="adm-sect"><form onsubmit="addTax(event)"><div class="inp-group"><label class="inp-label">Плательщик</label><input type="text" class="inp-field" id="taxPayer" required></div><div class="inp-group"><label class="inp-label">Сумма</label><input type="number" class="inp-field" id="taxAmount" required></div><div class="inp-group"><label class="inp-label">Тип</label><select class="inp-field" id="taxType"><option>Налог на прибыль</option><option>НДС</option><option>Имущественный</option></select></div><button type="submit" class="btn btn-red">📊 Начислить</button></form></div>`:''}<div class="stats"><div class="stat"><div class="stat-val">${tp.toLocaleString()}₽</div><div class="stat-lab">Уплачено</div></div><div class="stat"><div class="stat-val">${tpd.toLocaleString()}₽</div><div class="stat-lab">К уплате</div></div></div>${gov.taxes.map(t=>`<div class="card" onclick="showTaxDetail(${t.id})"><strong>${t.payer}</strong> — ${t.amount.toLocaleString()}₽<br>${t.status==='paid'?'✅ Уплачено':'⏳ Ожидает'}</div>`).join('')}`;}
+function showTaxDetail(id){const t=gov.taxes.find(x=>x.id===id);if(!t)return;document.getElementById('detailCard').innerHTML=`<h3>📊 Налог</h3><div class="detail-row"><span>Плательщик:</span><span>${t.payer}</span></div><div class="detail-row"><span>Сумма:</span><span style="color:#00c853;">${t.amount.toLocaleString()}₽</span></div><div class="detail-row"><span>Тип:</span><span>${t.type}</span></div><div class="detail-row"><span>Статус:</span><span style="color:${t.status==='paid'?'#00c853':'#ff9100'}">${t.status==='paid'?'Уплачено':'Ожидает'}</span></div>${t.status==='pending'&&isAdmin()?`<button class="btn btn-green" style="margin-top:15px;" onclick="payTax(${t.id});closeDetail();">✅ Оплатить</button>`:''}<button class="btn btn-red" style="margin-top:10px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+function addTax(e){e.preventDefault();if(!isAdmin())return;const p=document.getElementById('taxPayer').value.trim(),a=parseInt(document.getElementById('taxAmount').value),tp=document.getElementById('taxType').value;if(!p||!a)return;gov.taxes.push({id:Date.now(),payer:p,amount:a,type:tp,status:'pending',date:new Date().toISOString()});saveGov();toast('📊 Начислено!');e.target.reset();refreshAll();}
+function payTax(id){const t=gov.taxes.find(x=>x.id===id);if(!t)return;t.status='paid';saveGov();toast('✅ Уплачено!');refreshAll();}
+
+function renderBusiness(el){el.innerHTML=`<div class="sec-title">💼 Бизнес</div>${isAdmin()?`<div class="adm-sect"><form onsubmit="addBusiness(event)"><div class="inp-group"><label class="inp-label">Название</label><input type="text" class="inp-field" id="bizName" required></div><div class="inp-group"><label class="inp-label">Владелец</label><input type="text" class="inp-field" id="bizOwner" required></div><div class="inp-group"><label class="inp-label">Тип</label><select class="inp-field" id="bizType">${['Магазин','Ресторан','Автосалон','Стройка','Банк','IT'].map(t=>`<option>${t}</option>`).join('')}</select></div><button type="submit" class="btn btn-gold">📋 Регистрация</button></form></div>`:''}${gov.businesses.map(b=>`<div class="card" onclick="showBizDetail(${b.id})"><strong>🏢 ${b.name}</strong><br>${b.owner} | ${b.type}</div>`).join('')}`;}
+function showBizDetail(id){const b=gov.businesses.find(x=>x.id===id);if(!b)return;document.getElementById('detailCard').innerHTML=`<h3>🏢 ${b.name}</h3><div class="detail-row"><span>Владелец:</span><span>${b.owner}</span></div><div class="detail-row"><span>Тип:</span><span>${b.type}</span></div><div class="detail-row"><span>Лицензия:</span><span>${b.license}</span></div><div class="detail-row"><span>Статус:</span><span style="color:${b.status==='active'?'#00c853':'#ff9100'}">${b.status==='active'?'Активен':'Проверка'}</span></div>${isAdmin()?`<button class="btn" style="background:rgba(255,23,68,0.2);color:#ff1744;margin-top:15px;" onclick="deleteBiz(${b.id});closeDetail();">🗑️ Удалить</button>`:''}<button class="btn btn-red" style="margin-top:10px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+function addBusiness(e){e.preventDefault();if(!isAdmin())return;const n=document.getElementById('bizName').value.trim(),o=document.getElementById('bizOwner').value.trim(),t=document.getElementById('bizType').value;if(!n||!o)return;gov.businesses.push({id:Date.now(),name:n,owner:o,type:t,license:'ЛЦ-'+Date.now().toString().slice(-4),status:'active',date:new Date().toISOString()});saveGov();toast('💼 Зарегистрирован!');e.target.reset();refreshAll();}
+function deleteBiz(id){gov.businesses=gov.businesses.filter(b=>b.id!==id);saveGov();refreshAll();}
+
+function renderNews(el){const s=[...(gov.news||[])].sort((a,b)=>new Date(b.date)-new Date(a.date));el.innerHTML=`<div class="sec-title">📰 Новости</div>${isAdmin()?`<div class="adm-sect"><form onsubmit="addNews(event)"><div class="inp-group"><label class="inp-label">Заголовок</label><input type="text" class="inp-field" id="newsTitle" required></div><div class="inp-group"><label class="inp-label">Текст</label><textarea class="inp-field" id="newsText" rows="3" required style="resize:vertical;"></textarea></div><button type="submit" class="btn btn-red">📢 Опубликовать</button></form></div>`:''}${s.map(n=>`<div class="card"><strong>${n.title}</strong><br><span style="color:#b0b0b0;">${n.content}</span></div>`).join('')}`;}
+
+function renderElections(el){el.innerHTML=!gov.elections?`<p style="color:#b0b0b0;text-align:center;">Нет выборов</p>${isAdmin()?'<button class="btn btn-red" onclick="openElectionModal()">📢 Начать</button>':''}`:(()=>{const e=gov.elections,uv=currentUser&&e.votes[currentUser.username]!==undefined;return`<div style="background:rgba(255,255,255,0.05);border-radius:16px;padding:20px;border:2px solid rgba(255,215,0,0.3);"><h3 style="color:#FFD700;">🗳️ Выборы</h3>${e.candidates.map((c,i)=>`<div class="card"><strong>${c.name}</strong> - ${c.party}<br>Голосов: ${c.votes}${currentUser&&!uv?`<button class="btn btn-red btn-sm" onclick="vote(${i})">Голосовать</button>`:''}</div>`).join('')}${isAdmin()?'<button class="btn btn-green" onclick="finishElections()">🏆 Завершить</button>':''}</div>`})();}
+
+function renderSalaries(el){el.innerHTML=`<div class="sec-title">💰 Зарплаты</div>${isAdmin()?`<form onsubmit="addSalary(event)"><div class="inp-group"><label class="inp-label">Сотрудник</label><input type="text" class="inp-field" id="salName" required></div><div class="inp-group"><label class="inp-label">Сумма</label><input type="number" class="inp-field" id="salAmount" required></div><button type="submit" class="btn btn-green">Выплатить</button></form>`:''}${gov.salaries.slice(-10).reverse().map(s=>`<div class="card"><strong>${s.name}</strong> — ${s.amount.toLocaleString()}₽</div>`).join('')}`;}
+function renderMortgage(el){el.innerHTML=`<div class="sec-title">🏠 Ипотека</div>${isAdmin()?`<form onsubmit="addMortgage(event)"><div class="inp-group"><label class="inp-label">Гражданин</label><input type="text" class="inp-field" id="mortName" required></div><div class="inp-group"><label class="inp-label">Сумма</label><input type="number" class="inp-field" id="mortAmount" required></div><button type="submit" class="btn btn-blue">Оформить</button></form>`:''}${gov.mortgages.slice(-10).reverse().map(m=>`<div class="card"><strong>${m.name}</strong> — ${m.amount.toLocaleString()}₽</div>`).join('')}`;}
+function renderLawyers(el){el.innerHTML=`<div class="sec-title">⚖️ Адвокаты</div>${isAdmin()?`<form onsubmit="addLawyer(event)"><div class="inp-group"><label class="inp-label">Имя</label><input type="text" class="inp-field" id="lawName" required></div><button type="submit" class="btn btn-purple">Добавить</button></form>`:''}${gov.lawyers.map(l=>`<div class="card"><strong>⚖️ ${l.name}</strong></div>`).join('')}`;}
+function renderDecrees(el){el.innerHTML=`<div class="sec-title">📜 Указы</div>${isAdmin()?`<form onsubmit="addDecree(event)"><div class="inp-group"><label class="inp-label">Номер</label><input type="text" class="inp-field" id="decNum" required></div><div class="inp-group"><label class="inp-label">Текст</label><textarea class="inp-field" id="decText" rows="3" required style="resize:vertical;"></textarea></div><button type="submit" class="btn btn-red">📜 Подписать</button></form>`:''}${gov.decrees.slice(-10).reverse().map(d=>`<div class="card"><strong>Указ №${d.number}</strong><p>${d.text}</p></div>`).join('')}`;}
+function renderPhotos(el){const active=gov.members.filter(m=>m.isActive);el.innerHTML=`<div class="sec-title">📸 Фото</div>${isAdmin()?`<form onsubmit="uploadPhoto(event)"><select class="inp-field" id="photoMember" required><option value="">Сотрудник</option>${active.map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select><input type="url" class="inp-field" id="photoUrl" placeholder="URL фото" required><button type="submit" class="btn btn-blue">📸 Загрузить</button></form>`:''}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-top:15px;">${active.map(m=>`<div style="text-align:center;cursor:pointer;" onclick="openProfile(${m.id})"><div style="width:100%;aspect-ratio:1;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:2em;background:rgba(255,255,255,0.05);overflow:hidden;">${m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`:m.name[0]}</div><div style="color:#FFD700;font-size:0.7em;">${posInfo[m.position]?.title}</div></div>`).join('')}</div>`;}
+function uploadPhoto(e){e.preventDefault();if(!isAdmin())return;const id=parseInt(document.getElementById('photoMember').value),url=document.getElementById('photoUrl').value.trim();if(!id||!url)return;const m=gov.members.find(x=>x.id===id);if(!m)return;m.photoUrl=url;saveGov();toast('📸 Загружено!');e.target.reset();refreshAll();}
+
+function renderAdmin(el){el.innerHTML=`<div class="sec-title">⚙️ Админ</div>
+    <div class="adm-sect"><form onsubmit="addMember(event)"><div class="inp-group"><label class="inp-label">Имя</label><input type="text" class="inp-field" id="admName" required></div>
+    <div class="inp-group"><label class="inp-label">Должность</label><select class="inp-field" id="admPos" required>${Object.entries(posInfo).map(([k,v])=>`<option value="${k}">${v.title}</option>`).join('')}</select></div>
+    <button type="submit" class="btn btn-red">Назначить</button></form></div>
+    <div class="adm-sect"><form onsubmit="manageMember(event)"><select class="inp-field" id="admMem" required><option value="">Сотрудник</option>${gov.members.filter(m=>m.isActive).map(m=>`<option value="${m.id}">${m.name}</option>`).join('')}</select>
+    <select class="inp-field" id="admAct" required onchange="document.getElementById('admTrans').style.display=this.value==='transfer'?'block':'none'" style="margin-top:10px;"><option value="">Действие</option><option value="transfer">Перевести</option><option value="dismiss">Уволить</option></select>
+    <div id="admTrans" style="display:none;"><select class="inp-field" id="admNewPos" style="margin-top:10px;">${Object.keys(posInfo).map(k=>`<option value="${k}">${posInfo[k].title}</option>`).join('')}</select></div>
+    <button type="submit" class="btn btn-green" style="margin-top:10px;">Выполнить</button></form></div>
+    ${isOwner()?`<div class="adm-sect"><div style="color:#FFD700;">👑 Админы</div>${usersDB.filter(u=>u.role==='admin').map(u=>`<div class="card" style="display:flex;justify-content:space-between;"><div>${u.username}</div><button class="btn-sm" style="background:rgba(255,23,68,0.2);color:#ff1744;" onclick="deleteAdmin(${u.id})">🗑️</button></div>`).join('')}</div>`:''}
+    ${isAdmin()?`<div class="adm-sect"><form onsubmit="createAdmin(event)"><div class="inp-group"><label class="inp-label">Логин</label><input type="text" class="inp-field" id="adCrUser" required></div><div class="inp-group"><label class="inp-label">Пароль</label><input type="password" class="inp-field" id="adCrPass" required></div><div class="inp-group"><label class="inp-label">Имя</label><input type="text" class="inp-field" id="adCrName" required></div><button type="submit" class="btn btn-purple">👑 Создать</button></form></div>`:''}
+    <div class="adm-sect"><div style="font-weight:bold;">🌐 Синхронизация</div><div class="inp-group"><label class="inp-label">URL сервера</label><input type="text" class="inp-field" id="syncUrl" placeholder="http://IP:3000"></div><button class="btn btn-blue" onclick="setupSync(document.getElementById('syncUrl').value)">🌐 Подключить</button></div>`;
+}
+
+function openProfile(id){const m=gov.members.find(x=>x.id===id);if(!m)return;const info=posInfo[m.position]||{title:m.position,icon:'👤'};document.getElementById('detailCard').innerHTML=`<div style="text-align:center;"><div style="width:80px;height:80px;border-radius:50%;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:2em;background:linear-gradient(135deg,#667eea,#764ba2);overflow:hidden;">${m.photoUrl?`<img src="${m.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`:m.name[0]}</div><h3>${m.name}</h3><div style="color:#FFD700;">${info.icon} ${info.title}</div>${m.department?`<div style="color:#b0b0b0;">📁 ${m.department}</div>`:''}</div><div class="prof-det" style="margin-top:20px;background:rgba(255,255,255,0.05);border-radius:16px;padding:15px;"><div class="detail-row"><span>💰 Зарплата</span><span style="color:#00c853;">${(m.salary||0).toLocaleString()}₽</span></div><div class="detail-row"><span>📅 Назначен</span><span>${new Date(m.joinDate).toLocaleDateString()}</span></div></div><button class="btn btn-red" style="margin-top:15px;" onclick="closeDetail()">Закрыть</button>`;document.getElementById('detailOverlay').classList.add('active');}
+
+function addMember(e){e.preventDefault();if(!isAdmin())return;const n=document.getElementById('admName').value.trim(),p=document.getElementById('admPos').value;if(!n||!p)return;gov.members.push({id:Date.now(),name:n,position:p,salary:posInfo[p].salary,isActive:true,joinDate:new Date().toISOString(),addedBy:currentUser.username,photoUrl:'',history:[{action:"Назначение",date:new Date().toISOString()}]});saveGov();toast('✅ Назначен!');e.target.reset();refreshAll();}
+function manageMember(e){e.preventDefault();if(!isAdmin())return;const id=parseInt(document.getElementById('admMem').value),act=document.getElementById('admAct').value,m=gov.members.find(x=>x.id===id);if(!m)return;if(act==='dismiss'){m.isActive=false;toast('Уволен');}else{const np=document.getElementById('admNewPos').value;if(!np)return;m.position=np;m.salary=posInfo[np]?.salary||10000;toast('Переведён');}saveGov();e.target.reset();document.getElementById('admTrans').style.display='none';refreshAll();}
+function createAdmin(e){e.preventDefault();const u=document.getElementById('adCrUser').value.trim(),p=document.getElementById('adCrPass').value,n=document.getElementById('adCrName').value.trim();if(!u||!p||!n)return;if(usersDB.find(x=>x.username===u))return toast('Занято');usersDB.push({id:Date.now(),username:u,password:p,characterName:n,role:'admin',avatar:'👤',createdAt:new Date().toISOString()});saveUsers();toast('👑 Создан!');e.target.reset();refreshAll();}
+function deleteAdmin(id){if(!isOwner())return;usersDB=usersDB.filter(u=>u.id!==id);saveUsers();toast('Удалён');refreshAll();}
+function addNews(e){e.preventDefault();if(!isAdmin())return;const t=document.getElementById('newsTitle').value.trim(),c=document.getElementById('newsText').value.trim();if(!t||!c)return;gov.news.push({id:Date.now(),title:t,content:c,date:new Date().toISOString(),author:currentUser.username});saveGov();toast('📰 Опубликовано!');e.target.reset();refreshAll();}
+function addSalary(e){e.preventDefault();const n=document.getElementById('salName').value.trim(),a=parseInt(document.getElementById('salAmount').value);if(!n||!a)return;gov.salaries.push({name:n,amount:a,date:new Date().toISOString()});saveGov();toast('💰 Выплачено!');e.target.reset();refreshAll();}
+function addMortgage(e){e.preventDefault();const n=document.getElementById('mortName').value.trim(),a=parseInt(document.getElementById('mortAmount').value);if(!n||!a)return;gov.mortgages.push({name:n,amount:a,rate:10,date:new Date().toISOString()});saveGov();toast('🏠 Оформлено!');e.target.reset();refreshAll();}
+function addLawyer(e){e.preventDefault();const n=document.getElementById('lawName').value.trim();if(!n)return;gov.lawyers.push({name:n,date:new Date().toISOString()});saveGov();toast('⚖️ Добавлен!');e.target.reset();refreshAll();}
+function addDecree(e){e.preventDefault();const n=document.getElementById('decNum').value.trim(),t=document.getElementById('decText').value.trim();if(!n||!t)return;gov.decrees.push({id:Date.now(),number:n,text:t,date:new Date().toISOString()});saveGov();toast('📜 Подписан!');e.target.reset();refreshAll();}
+function vote(i){if(!currentUser||!gov.elections||gov.elections.votes[currentUser.username]!==undefined)return;gov.elections.votes[currentUser.username]=i;gov.elections.candidates[i].votes++;saveGov();toast('✅ Голос учтён!');refreshAll();}
+function finishElections(){if(!isAdmin()||!gov.elections)return;const w=gov.elections.candidates.reduce((a,b)=>a.votes>b.votes?a:b);gov.members.push({id:Date.now(),name:w.name,position:'president',salary:50000,isActive:true,joinDate:new Date().toISOString(),addedBy:'election',photoUrl:'',history:[{action:"Избран"}]});gov.elections=null;saveGov();toast(`🏆 ${w.name}!`);refreshAll();}
+
+function openElectionModal(){document.getElementById('modalCard').innerHTML=`<h3 style="color:#FFD700;">📢 Выборы</h3><form onsubmit="startElections(event)"><div id="candCont"><div style="background:rgba(255,255,255,0.03);padding:15px;border-radius:12px;margin-bottom:15px;"><input type="text" class="inp-field cand-name" placeholder="Кандидат 1" required><input type="text" class="inp-field cand-party" placeholder="Партия" style="margin-top:10px;"></div></div><button type="button" class="btn btn-blue" style="margin-bottom:10px;" onclick="addCand()">➕</button><button type="submit" class="btn btn-red">Начать</button></form>`;document.getElementById('modalOverlay').classList.add('active');}
+function addCand(){const c=document.getElementById('candCont'),d=document.createElement('div');d.style.cssText='background:rgba(255,255,255,0.03);padding:15px;border-radius:12px;margin-bottom:15px;';d.innerHTML=`<input type="text" class="inp-field cand-name" placeholder="Кандидат ${c.children.length+1}" required><input type="text" class="inp-field cand-party" placeholder="Партия" style="margin-top:10px;">`;c.appendChild(d);}
+function startElections(e){e.preventDefault();const ns=document.querySelectorAll('.cand-name'),ps=document.querySelectorAll('.cand-party'),cs=[];ns.forEach((inp,i)=>{if(inp.value.trim())cs.push({name:inp.value.trim(),party:ps[i].value.trim()||'Независимый',votes:0});});if(cs.length<2)return toast('Минимум 2');gov.elections={candidates:cs,votes:{},date:new Date().toISOString()};saveGov();closeModal();toast('✅ Начались!');refreshAll();}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('active');}
+
+function openChat(){document.getElementById('chatOverlay').classList.add('active');renderChat();}
+function closeChat(){document.getElementById('chatOverlay').classList.remove('active');}
+function renderChat(){document.getElementById('chatMsgs').innerHTML=chatMessages.map(m=>`<div class="chat-msg ${m.from===currentUser?.username?'me':'other'}"><strong>${m.from}:</strong> ${m.text}</div>`).join('')||'<p style="color:#b0b0b0;">Чат пуст</p>';}
+function sendChat(){const inp=document.getElementById('chatInp'),text=inp.value.trim();if(!text||!currentUser)return;chatMessages.push({from:currentUser.username,text,time:new Date().toISOString()});saveChat();renderChat();inp.value='';setTimeout(()=>{if(text.toLowerCase().includes('помощ')){chatMessages.push({from:'Поддержка',text:'Администратор ответит!',time:new Date().toISOString()});saveChat();renderChat();}},1500);}
+
+function refreshAll(){if(currentView==='mobile')renderMobilePage(currentPage);else renderDesktopPage(currentPage);}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity 0.3s';setTimeout(()=>t.remove(),300);},2500);}
+
+// Service Worker для PWA
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{const b=new Blob(['self.addEventListener("install",e=>e.waitUntil(self.skipWaiting()));self.addEventListener("activate",e=>clients.claim());self.addEventListener("fetch",e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));'],{type:'application/javascript'});navigator.serviceWorker.register(URL.createObjectURL(b)).catch(()=>{});});}
+
+function init(){loadData();const savedUser=localStorage.getItem('gov70_user');if(savedUser){try{currentUser=JSON.parse(savedUser);if(usersDB.find(u=>u.id===currentUser.id)){const savedView=localStorage.getItem('gov70_view');if(savedView)currentView=savedView;showApp();}else logout();}catch(e){logout();}}setTimeout(()=>{document.getElementById('splash').style.opacity='0';document.getElementById('splash').style.transition='opacity 0.5s';setTimeout(()=>document.getElementById('splash').style.display='none',500);},1000);}
+init();
+console.log('🏛️ Правительство Родины RP v7.0');
+console.log('🚔 МВД | ⚖️ Суд | 🏗️ Стройка | 🌐 Синхронизация');
+</script>
+</body>
+</html>
